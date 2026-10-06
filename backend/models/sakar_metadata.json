@@ -1,0 +1,8 @@
+{
+  "dataset": "UCI Parkinson's Disease Classification Dataset (Sakar et al. 2019)",
+  "citation": "Sakar CO, Serbes G, Gunduz A, et al. 'A comparative analysis of speech signal processing methods for Parkinson's disease classification.' Comput Methods Programs Biomed 2019; 168: 77-84.",
+  "n_samples": 756,
+  "n_features": 753,
+  "accuracy": 0.9973544973544973,
+  "roc_auc": 1.0
+}

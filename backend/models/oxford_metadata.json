@@ -1,0 +1,306 @@
+{
+  "dataset": "UCI Oxford Parkinson's Disease Detection Dataset (Little et al. 2008)",
+  "citation": "Little MA, McSharry PE, Roberts SJ, Costello DA, Moroz IM. 'Suitability of dysphonia measurements for telemonitoring of Parkinson's disease.' IEEE Trans Biomed Eng 2009; 56(4): 1015-1022.",
+  "n_samples": 195,
+  "n_features": 22,
+  "feature_names": [
+    "MDVP:Fo(Hz)",
+    "MDVP:Fhi(Hz)",
+    "MDVP:Flo(Hz)",
+    "MDVP:Jitter(%)",
+    "MDVP:Jitter(Abs)",
+    "MDVP:RAP",
+    "MDVP:PPQ",
+    "Jitter:DDP",
+    "MDVP:Shimmer",
+    "MDVP:Shimmer(dB)",
+    "Shimmer:APQ3",
+    "Shimmer:APQ5",
+    "MDVP:APQ",
+    "Shimmer:DDA",
+    "NHR",
+    "HNR",
+    "RPDE",
+    "DFA",
+    "spread1",
+    "spread2",
+    "D2",
+    "PPE"
+  ],
+  "target_distribution": {
+    "healthy": 48,
+    "parkinsons": 147
+  },
+  "metrics": {
+    "svm": {
+      "accuracy": 0.9179487179487179,
+      "accuracy_std": 0.05229763603684907,
+      "roc_auc": 0.9568071519795659,
+      "sensitivity": 0.9659863945578231,
+      "specificity": 0.7708333333333334,
+      "f1": 0.946546262850792,
+      "confusion_matrix": [
+        [
+          37,
+          11
+        ],
+        [
+          5,
+          142
+        ]
+      ]
+    },
+    "random_forest": {
+      "accuracy": 0.8974358974358975,
+      "accuracy_std": 0.04586806107691878,
+      "roc_auc": 0.953103448275862,
+      "sensitivity": 0.9319727891156463,
+      "specificity": 0.7916666666666666,
+      "feature_importances": {
+        "PPE": 0.13583817172805737,
+        "spread1": 0.11312264579559371,
+        "Shimmer:APQ5": 0.07618861776536583,
+        "MDVP:APQ": 0.06815862800866698,
+        "spread2": 0.06571293443452933,
+        "MDVP:Fo(Hz)": 0.06362942579540676,
+        "MDVP:Shimmer": 0.04406066222495141,
+        "Jitter:DDP": 0.04204489003820561,
+        "MDVP:Fhi(Hz)": 0.04056753168820265,
+        "MDVP:RAP": 0.03909189101664921,
+        "D2": 0.03446907685184725,
+        "MDVP:Flo(Hz)": 0.03361844995862006,
+        "MDVP:Shimmer(dB)": 0.032298544988441404,
+        "Shimmer:DDA": 0.03220676509202946,
+        "NHR": 0.027944798599255947,
+        "Shimmer:APQ3": 0.026472559417182205,
+        "DFA": 0.025242866737669338,
+        "MDVP:Jitter(%)": 0.024266120529506132,
+        "MDVP:PPQ": 0.021174318942906722,
+        "RPDE": 0.020734466859074267,
+        "HNR": 0.017280968505667862,
+        "MDVP:Jitter(Abs)": 0.01587566502217039
+      },
+      "confusion_matrix": [
+        [
+          38,
+          10
+        ],
+        [
+          10,
+          137
+        ]
+      ]
+    },
+    "cnn_lstm": {
+      "accuracy": 0.9435897435897436,
+      "roc_auc": 0.9913548752834467,
+      "architecture": "1D-Conv(16) -> ReLU -> Recurrent/BiLSTM -> Dense(16) -> Sigmoid"
+    },
+    "autoencoder_anomaly": {
+      "healthy_baseline_mse": 0.3738101570944417,
+      "healthy_baseline_std": 0.18618332231207646,
+      "pd_mean_mse": 1.105021722015091,
+      "latent_dimension": 6
+    }
+  },
+  "normative_baselines": {
+    "MDVP:Fo(Hz)": {
+      "healthy_mean": 181.9377708333333,
+      "healthy_std": 52.7310671225468,
+      "healthy_median": 198.996,
+      "pd_mean": 145.1807619047619,
+      "pd_std": 32.3480498902669,
+      "pd_median": 145.174,
+      "relative_change_pct": -20.203066554136896
+    },
+    "MDVP:Fhi(Hz)": {
+      "healthy_mean": 223.63675,
+      "healthy_std": 96.72706709427085,
+      "healthy_median": 231.1615,
+      "pd_mean": 188.44146258503403,
+      "pd_std": 88.33917967815418,
+      "pd_median": 163.335,
+      "relative_change_pct": -15.737702955782524
+    },
+    "MDVP:Flo(Hz)": {
+      "healthy_mean": 145.2072916666667,
+      "healthy_std": 58.75707046814219,
+      "healthy_median": 113.9385,
+      "pd_mean": 106.89355782312924,
+      "pd_std": 32.27435792239933,
+      "pd_median": 99.77,
+      "relative_change_pct": -26.385544006625544
+    },
+    "MDVP:Jitter(%)": {
+      "healthy_mean": 0.0038660416666666665,
+      "healthy_std": 0.0020546229550914325,
+      "healthy_median": 0.003355,
+      "pd_mean": 0.006989251700680272,
+      "pd_std": 0.005239786946473302,
+      "pd_median": 0.00544,
+      "relative_change_pct": 80.78573133192492
+    },
+    "MDVP:Jitter(Abs)": {
+      "healthy_mean": 2.3375000000000002e-05,
+      "healthy_std": 1.4966096436719611e-05,
+      "healthy_median": 2.5e-05,
+      "pd_mean": 5.068027210884354e-05,
+      "pd_std": 3.6801203523082877e-05,
+      "pd_median": 4e-05,
+      "relative_change_pct": 116.81399832660335
+    },
+    "MDVP:RAP": {
+      "healthy_mean": 0.0019250000000000003,
+      "healthy_std": 0.0010661802969160116,
+      "healthy_median": 0.0016250000000000001,
+      "pd_mean": 0.0037574829931972796,
+      "pd_std": 0.003241169635731135,
+      "pd_median": 0.00284,
+      "relative_change_pct": 95.19392172453396
+    },
+    "MDVP:PPQ": {
+      "healthy_mean": 0.0020560416666666665,
+      "healthy_std": 0.0009432644528520008,
+      "healthy_median": 0.001775,
+      "pd_mean": 0.003900340136054422,
+      "pd_std": 0.0029975113913126832,
+      "pd_median": 0.00314,
+      "relative_change_pct": 89.70141506800312
+    },
+    "Jitter:DDP": {
+      "healthy_mean": 0.005776041666666666,
+      "healthy_std": 0.0031993654554264175,
+      "healthy_median": 0.004875,
+      "pd_mean": 0.011273061224489796,
+      "pd_std": 0.009723507429374579,
+      "pd_median": 0.00853,
+      "relative_change_pct": 95.16931966655012
+    },
+    "MDVP:Shimmer": {
+      "healthy_mean": 0.01761520833333333,
+      "healthy_std": 0.005544432127391247,
+      "healthy_median": 0.016704999999999998,
+      "pd_mean": 0.03365816326530613,
+      "pd_std": 0.019970079023187166,
+      "pd_median": 0.02838,
+      "relative_change_pct": 91.0744546893303
+    },
+    "MDVP:Shimmer(dB)": {
+      "healthy_mean": 0.16295833333333334,
+      "healthy_std": 0.05782216255268825,
+      "healthy_median": 0.154,
+      "pd_mean": 0.32120408163265307,
+      "pd_std": 0.20779837233450602,
+      "pd_median": 0.263,
+      "relative_change_pct": 97.1081043002729
+    },
+    "Shimmer:APQ3": {
+      "healthy_mean": 0.009503541666666667,
+      "healthy_std": 0.003456031723642405,
+      "healthy_median": 0.008775,
+      "pd_mean": 0.01767578231292517,
+      "pd_std": 0.010797270832564118,
+      "pd_median": 0.01484,
+      "relative_change_pct": 85.99152750518626
+    },
+    "Shimmer:APQ5": {
+      "healthy_mean": 0.010508541666666668,
+      "healthy_std": 0.003231086366009106,
+      "healthy_median": 0.010225000000000001,
+      "pd_mean": 0.020284693877551024,
+      "pd_std": 0.012847239472477403,
+      "pd_median": 0.0165,
+      "relative_change_pct": 93.03053193284214
+    },
+    "MDVP:APQ": {
+      "healthy_mean": 0.013304791666666668,
+      "healthy_std": 0.0038251229932017307,
+      "healthy_median": 0.013015,
+      "pd_mean": 0.0276004081632653,
+      "pd_std": 0.018062426522675635,
+      "pd_median": 0.02157,
+      "relative_change_pct": 107.44712773229168
+    },
+    "Shimmer:DDA": {
+      "healthy_mean": 0.028511458333333337,
+      "healthy_std": 0.01036847718349276,
+      "healthy_median": 0.02633,
+      "pd_mean": 0.05302727891156462,
+      "pd_std": 0.03239148570179548,
+      "pd_median": 0.04451,
+      "relative_change_pct": 85.98585274597943
+    },
+    "NHR": {
+      "healthy_mean": 0.011482708333333333,
+      "healthy_std": 0.019088407280568626,
+      "healthy_median": 0.004824999999999999,
+      "pd_mean": 0.029210952380952383,
+      "pd_std": 0.04444717830594796,
+      "pd_median": 0.01658,
+      "relative_change_pct": 154.3907894634531
+    },
+    "HNR": {
+      "healthy_mean": 24.678749999999997,
+      "healthy_std": 3.4345402708863997,
+      "healthy_median": 24.997,
+      "pd_mean": 20.974047619047617,
+      "pd_std": 4.3391425441283715,
+      "pd_median": 21.414,
+      "relative_change_pct": -15.0117099972745
+    },
+    "RPDE": {
+      "healthy_mean": 0.442551875,
+      "healthy_std": 0.09219903462817289,
+      "healthy_median": 0.4353675,
+      "pd_mean": 0.5168159183673469,
+      "pd_std": 0.10125439547952868,
+      "pd_median": 0.530529,
+      "relative_change_pct": 16.780867410706797
+    },
+    "DFA": {
+      "healthy_mean": 0.6957155625000001,
+      "healthy_std": 0.05134599727626179,
+      "healthy_median": 0.6825275,
+      "pd_mean": 0.7254079387755102,
+      "pd_std": 0.0547863508205826,
+      "pd_median": 0.726652,
+      "relative_change_pct": 4.267890194782028
+    },
+    "spread1": {
+      "healthy_mean": -6.759263874999999,
+      "healthy_std": 0.6427817080318029,
+      "healthy_median": -6.8264485,
+      "pd_mean": -5.333419721088434,
+      "pd_std": 0.9707922898764274,
+      "pd_median": -5.44004,
+      "relative_change_pct": 21.094666228155873
+    },
+    "spread2": {
+      "healthy_mean": 0.16029200000000002,
+      "healthy_std": 0.0629822699286212,
+      "healthy_median": 0.167356,
+      "pd_mean": 0.2481326666666667,
+      "pd_std": 0.0778093576389283,
+      "pd_median": 0.240875,
+      "relative_change_pct": 54.80040592585199
+    },
+    "D2": {
+      "healthy_mean": 2.1544907291666666,
+      "healthy_std": 0.3102688409806539,
+      "healthy_median": 2.12951,
+      "pd_mean": 2.4560580408163264,
+      "pd_std": 0.37574166029950484,
+      "pd_median": 2.439597,
+      "relative_change_pct": 13.997150582602075
+    },
+    "PPE": {
+      "healthy_mean": 0.12301710416666667,
+      "healthy_std": 0.04481984575402341,
+      "healthy_median": 0.1151185,
+      "pd_mean": 0.2338282244897959,
+      "pd_std": 0.08427126619750916,
+      "pd_median": 0.222716,
+      "relative_change_pct": 90.077815661308
+    }
+  }
+}

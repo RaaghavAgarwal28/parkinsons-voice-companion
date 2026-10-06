@@ -1,0 +1,732 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Parkinson's Voice Companion | ML-Powered Acoustic Biomarker Telemonitoring</title>
+  <meta name="description" content="Clinical-grade machine learning platform for Parkinson's Disease early detection, voice biomarker extraction, LSVT LOUD vocal therapy, and longitudinal telemonitoring.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Outfit:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/static/style.css">
+  <!-- Chart.js for interactive medical charts -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <!-- Three.js for 3D Neural Particle Visualization -->
+  <script src="https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.min.js"></script>
+</head>
+<body>
+  <!-- 3D Background Canvas (Three.js Neural Particle System) -->
+  <canvas id="three-bg-canvas"></canvas>
+
+  <!-- Animated gradient overlay -->
+  <div class="gradient-orbs">
+    <div class="orb orb-1"></div>
+    <div class="orb orb-2"></div>
+    <div class="orb orb-3"></div>
+  </div>
+
+  <div class="app-layout">
+    <!-- Sidebar / Brand Navigation -->
+    <aside class="sidebar">
+      <div class="brand-container">
+        <div class="brand-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M12 2a3 3 0 0 0-3 3v7a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3Z"/>
+            <path d="M19 10v2a7 7 0 0 1-14 0v-2"/>
+            <line x1="12" x2="12" y1="19" y2="22"/>
+            <line x1="8" x2="16" y1="22" y2="22"/>
+          </svg>
+        </div>
+        <div class="brand-text">
+          <h1>Parkinson's Voice</h1>
+          <span class="brand-badge">RESEARCH COMPANION</span>
+        </div>
+      </div>
+
+      <nav class="nav-menu">
+        <button class="nav-item active" data-tab="voice-lab" id="nav-voice-lab">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2v20M17 5v14M22 9v6M7 5v14M2 9v6"/></svg>
+          <span>Voice Biomarker Lab</span>
+        </button>
+        <button class="nav-item" data-tab="longitudinal" id="nav-longitudinal">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 3v18h18"/><path d="m19 9-5 5-4-4-3 3"/></svg>
+          <span>Longitudinal & BOCPD</span>
+        </button>
+        <button class="nav-item" data-tab="lsvt-loud" id="nav-lsvt-loud">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><path d="M15.54 8.46a5 5 0 0 1 0 7.07"/><path d="M19.07 4.93a10 10 0 0 1 0 14.14"/></svg>
+          <span>LSVT LOUD Therapy</span>
+        </button>
+        <button class="nav-item" data-tab="motor-tap" id="nav-motor-tap">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 11V6a2 2 0 0 0-2-2v0a2 2 0 0 0-2 2v0"/><path d="M14 10V4a2 2 0 0 0-2-2v0a2 2 0 0 0-2 2v2"/><path d="M10 10.5V6a2 2 0 0 0-2-2v0a2 2 0 0 0-2 2v8"/><path d="M18 8a2 2 0 1 1 4 0v6a8 8 0 0 1-8 8h-2c-2.8 0-4.5-.86-5.99-2.34l-3.6-3.6a2 2 0 0 1 2.83-2.82L7 15"/></svg>
+          <span>Multimodal Motor Tap</span>
+        </button>
+        <button class="nav-item" data-tab="research" id="nav-research">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 19.5v-15A2.5 2.5 0 0 1 6.5 2H20v20H6.5a2.5 2.5 0 0 1-0-5H20"/></svg>
+          <span>Research & Provenance</span>
+        </button>
+      </nav>
+
+      <div class="sidebar-footer">
+        <div class="provenance-card">
+          <div class="prov-header">
+            <span class="status-dot online"></span>
+            <span class="prov-title">Real Research Datasets</span>
+          </div>
+          <p class="prov-desc">Trained on UCI Oxford (Little 2008), Sakar (2019), and Tsanas Telemonitoring (5,875 samples).</p>
+          <div class="cv-pill">CV Acc: 91.8% | Sens: 96.6%</div>
+        </div>
+      </div>
+    </aside>
+
+    <!-- Main Content Area -->
+    <main class="main-content">
+      <!-- Top Bar -->
+      <header class="topbar">
+        <div class="topbar-left">
+          <h2 id="page-title">Voice Biomarker Lab</h2>
+          <p id="page-subtitle" class="subtitle">Extract 22 clinical acoustic biomarkers and classify dysphonia using data-driven ML</p>
+        </div>
+        <div class="topbar-right">
+          <div class="telemetry-pill">
+            <span class="pulse-indicator"></span>
+            <span class="telemetry-text">ML Engines Ready: SVM • RF • CNN-LSTM • Autoencoder • UPDRS</span>
+          </div>
+        </div>
+      </header>
+
+      <!-- TAB 1: Voice Biomarker Lab -->
+      <section id="tab-voice-lab" class="tab-pane active">
+        <!-- Hero 3D Visual Banner -->
+        <div class="hero-banner">
+          <div class="hero-image-container">
+            <img src="/static/assets/voice_neural.jpg" alt="Neural Voice Analysis" class="hero-image" id="hero-3d-image">
+            <div class="hero-image-overlay"></div>
+            <div class="hero-particles" id="hero-particles"></div>
+          </div>
+          <div class="hero-text">
+            <div class="hero-label">
+              <span class="hero-dot"></span>
+              ML-Powered Acoustic Analysis
+            </div>
+            <h3>Voice-to-Neural Signal Extraction Engine</h3>
+            <p>Transforming raw acoustic waveforms into 22 clinically validated dysphonia biomarkers through deterministic DSP and ensemble classification.</p>
+            <div class="hero-stats">
+              <div class="hero-stat">
+                <span class="hs-val">22</span>
+                <span class="hs-label">Biomarkers</span>
+              </div>
+              <div class="hero-stat">
+                <span class="hs-val">4</span>
+                <span class="hs-label">ML Models</span>
+              </div>
+              <div class="hero-stat">
+                <span class="hs-val">91.8%</span>
+                <span class="hs-label">CV Accuracy</span>
+              </div>
+              <div class="hero-stat">
+                <span class="hs-val">5,875</span>
+                <span class="hs-label">Training Samples</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="grid-2-col">
+          <!-- Audio Capture Card -->
+          <div class="glass-card capture-card">
+            <div class="card-header">
+              <div class="header-icon animate-glow">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2a3 3 0 0 0-3 3v7a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3Z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/></svg>
+              </div>
+              <div>
+                <h3>Acoustic Recording & Ingestion</h3>
+                <p class="card-subtitle">Sustain the vowel <strong>/a/ ("AHHH")</strong> steadily for 3–5 seconds into your microphone.</p>
+              </div>
+            </div>
+
+            <!-- Waveform Canvas -->
+            <div class="waveform-container">
+              <canvas id="waveform-canvas"></canvas>
+              <div id="recording-timer" class="recording-timer">00:00.0</div>
+              <div id="mic-status-label" class="mic-status">Microphone Ready</div>
+            </div>
+
+            <!-- Controls -->
+            <div class="recorder-controls">
+              <button id="btn-record" class="btn btn-primary btn-record">
+                <span class="rec-icon"></span>
+                <span id="btn-record-text">Start Recording</span>
+              </button>
+              <button id="btn-stop" class="btn btn-secondary" disabled>
+                <svg viewBox="0 0 24 24" fill="currentColor"><rect x="6" y="6" width="12" height="12" rx="2"/></svg>
+                <span>Stop</span>
+              </button>
+              <label class="btn btn-secondary btn-upload">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" x2="12" y1="3" y2="15"/></svg>
+                <span>Upload Audio</span>
+                <input type="file" id="audio-file-input" accept="audio/*" style="display: none;">
+              </label>
+            </div>
+
+            <!-- Audio Player -->
+            <div id="audio-playback-container" class="audio-playback-container" style="display: none;">
+              <audio id="audio-player" controls></audio>
+              <button id="btn-analyze" class="btn btn-accent">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+                <span>Run Acoustic Extraction & ML Analysis</span>
+              </button>
+            </div>
+
+            <!-- Quick Calibration Samples -->
+            <div class="sample-loader-box">
+              <span class="sample-label">Or test immediate research calibration samples:</span>
+              <div class="sample-buttons">
+                <button class="btn-sample" data-sample="healthy_control_ah.wav">
+                  <span class="dot green"></span> Healthy Control (/a/)
+                </button>
+                <button class="btn-sample" data-sample="early_pd_ah.wav">
+                  <span class="dot amber"></span> Early Stage PD (/a/)
+                </button>
+                <button class="btn-sample" data-sample="moderate_pd_ah.wav">
+                  <span class="dot red"></span> Moderate PD (/a/)
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <!-- Live Diagnosis & Risk Gauge Card -->
+          <div class="glass-card result-overview-card" id="results-overview-card">
+            <div class="card-header">
+              <div class="header-icon">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg>
+              </div>
+              <div>
+                <h3>Ensemble Diagnostic Assessment</h3>
+                <p class="card-subtitle">Multi-model consensus learned strictly from Little et al. & Tsanas et al.</p>
+              </div>
+            </div>
+
+            <div id="results-placeholder" class="results-placeholder">
+              <div class="placeholder-icon">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
+              </div>
+              <h4>No Audio Analyzed Yet</h4>
+              <p>Record your voice above or select a calibration sample to view acoustic biomarkers and ML model inference.</p>
+            </div>
+
+            <div id="results-content" class="results-content" style="display: none;">
+              <!-- Main Probability Gauge -->
+              <div class="diagnostic-gauge-wrapper">
+                <div class="gauge-circle-box">
+                  <svg viewBox="0 0 100 100" class="gauge-svg">
+                    <circle class="gauge-bg" cx="50" cy="50" r="42"></circle>
+                    <circle id="gauge-fill" class="gauge-fill" cx="50" cy="50" r="42"></circle>
+                  </svg>
+                  <div class="gauge-center-text">
+                    <span id="gauge-percentage" class="gauge-value">--%</span>
+                    <span class="gauge-caption">PD Biomarker Index</span>
+                  </div>
+                </div>
+                <div class="diagnostic-summary">
+                  <div id="diagnostic-badge" class="diag-badge healthy">Awaiting Input</div>
+                  <h4 id="diagnostic-verdict">Acoustic Status</h4>
+                  <p id="diagnostic-desc">Biomarker distribution matches healthy normative voice profiles.</p>
+                  <div class="meta-row">
+                    <span class="meta-item">Confidence: <strong id="res-confidence">High</strong></span>
+                    <span class="meta-item">Anomaly Z-Score: <strong id="res-anomaly-z">0.0</strong></span>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Multi-Model Consensus Cards -->
+              <div class="models-grid">
+                <div class="mini-model-card">
+                  <div class="mm-header">SVM (Little 2009)</div>
+                  <div class="mm-prob" id="mm-svm-prob">--%</div>
+                  <div class="mm-footer">RBF Kernel (C=10)</div>
+                </div>
+                <div class="mini-model-card">
+                  <div class="mm-header">Random Forest</div>
+                  <div class="mm-prob" id="mm-rf-prob">--%</div>
+                  <div class="mm-footer">150 Trees (Balanced)</div>
+                </div>
+                <div class="mini-model-card">
+                  <div class="mm-header">CNN-LSTM (Er 2021)</div>
+                  <div class="mm-prob" id="mm-dl-prob">--%</div>
+                  <div class="mm-footer">Conv1D + BiLSTM</div>
+                </div>
+                <div class="mini-model-card">
+                  <div class="mm-header">Autoencoder Anomaly</div>
+                  <div class="mm-prob" id="mm-ae-mse">0.00</div>
+                  <div class="mm-footer">Recon MSE Error</div>
+                </div>
+              </div>
+
+              <!-- UPDRS Telemonitoring Telemetry -->
+              <div class="updrs-banner">
+                <div class="updrs-icon">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" x2="8" y1="13" y2="13"/><line x1="16" x2="8" y1="17" y2="17"/></svg>
+                </div>
+                <div class="updrs-info">
+                  <span class="updrs-title">Tsanas Telemonitoring UPDRS Prediction (MDS-UPDRS Equivalent)</span>
+                  <div class="updrs-values">
+                    <span>Motor UPDRS: <strong id="res-motor-updrs">--</strong> / 108</span>
+                    <span>Total UPDRS: <strong id="res-total-updrs">--</strong> / 176</span>
+                    <span class="severity-tag" id="res-updrs-stage">Mild</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Biomarkers Radar & Normative Comparison Table -->
+        <div class="grid-2-col" style="margin-top: 1.5rem;">
+          <!-- Radar Chart Card -->
+          <div class="glass-card">
+            <div class="card-header">
+              <div class="header-icon">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="12 2 2 22 22 22 12 2"/></svg>
+              </div>
+              <div>
+                <h3>Acoustic Biomarker Radar vs Normative Baseline</h3>
+                <p class="card-subtitle">Normalized feature deviations compared to healthy research controls (Little et al. 2008)</p>
+              </div>
+            </div>
+            <div class="chart-box" style="height: 320px; position: relative;">
+              <canvas id="radar-biomarkers-canvas"></canvas>
+            </div>
+          </div>
+
+          <!-- Feature Breakdown Table -->
+          <div class="glass-card">
+            <div class="card-header">
+              <div class="header-icon">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="8" x2="21" y1="6" y2="6"/><line x1="8" x2="21" y1="12" y2="12"/><line x1="8" x2="21" y1="18" y2="18"/><line x1="3" x2="3.01" y1="6" y2="6"/><line x1="3" x2="3.01" y1="12" y2="12"/><line x1="3" x2="3.01" y1="18" y2="18"/></svg>
+              </div>
+              <div>
+                <h3>Biomarker Comparison vs Reference Norms</h3>
+                <p class="card-subtitle">Quantitative Z-score deviations from healthy population means</p>
+              </div>
+            </div>
+            <div class="table-responsive">
+              <table class="biomarker-table" id="biomarker-table">
+                <thead>
+                  <tr>
+                    <th>Biomarker</th>
+                    <th>User Value</th>
+                    <th>Healthy Mean</th>
+                    <th>Z-Score</th>
+                    <th>Clinical Status</th>
+                  </tr>
+                </thead>
+                <tbody id="biomarker-table-body">
+                  <tr><td colspan="5" class="table-empty">Run an audio analysis to view quantitative metrics.</td></tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- TAB 2: Longitudinal Telemonitoring & BOCPD -->
+      <section id="tab-longitudinal" class="tab-pane">
+        <div class="glass-card">
+          <div class="card-header flex-between">
+            <div>
+              <h3>Longitudinal Telemonitoring & Bayesian Changepoint Detection</h3>
+              <p class="card-subtitle">Track acoustic progression over time and detect medication state shifts (Tsanas 2010; Adams & MacKay 2007 BOCPD)</p>
+            </div>
+            <div class="profile-selector-box">
+              <label>Select Patient Cohort Profile:</label>
+              <select id="profile-select" class="select-input">
+                <option value="early_pd_patient">Early PD Patient (Medication ON/OFF Fluctuations)</option>
+                <option value="healthy_control">Healthy Control Cohort (30-Day Stability)</option>
+              </select>
+            </div>
+          </div>
+
+          <!-- Longitudinal Stat Badges -->
+          <div class="stat-badges-grid">
+            <div class="stat-badge-card">
+              <span class="badge-label">Tracking Sessions</span>
+              <span class="badge-val" id="long-total-sessions">--</span>
+              <span class="badge-sub">Over 30 Days</span>
+            </div>
+            <div class="stat-badge-card">
+              <span class="badge-label">Progression Trend</span>
+              <span class="badge-val" id="long-trend-status">--</span>
+              <span class="badge-sub" id="long-trend-slope">Slope: --</span>
+            </div>
+            <div class="stat-badge-card">
+              <span class="badge-label">BOCPD Changepoints</span>
+              <span class="badge-val" id="long-flagged-shifts">--</span>
+              <span class="badge-sub">Significant State Shifts</span>
+            </div>
+            <div class="stat-badge-card">
+              <span class="badge-label">Mean Predicted UPDRS</span>
+              <span class="badge-val" id="long-mean-updrs">--</span>
+              <span class="badge-sub">Severity Range: Mild</span>
+            </div>
+          </div>
+
+          <!-- Longitudinal Line Chart -->
+          <div class="chart-box" style="height: 340px; margin-top: 1.5rem;">
+            <canvas id="longitudinal-chart-canvas"></canvas>
+          </div>
+
+          <!-- Changepoint Event Log -->
+          <div class="changepoint-log-container">
+            <h4>Bayesian Changepoint & Telemonitoring Event Log</h4>
+            <div class="table-responsive">
+              <table class="biomarker-table" id="longitudinal-table">
+                <thead>
+                  <tr>
+                    <th>Day / Session</th>
+                    <th>Pitch Entropy (PPE)</th>
+                    <th>Jitter (%)</th>
+                    <th>HNR (dB)</th>
+                    <th>Pred. UPDRS</th>
+                    <th>Medication State</th>
+                    <th>BOCPD Shift Probability</th>
+                  </tr>
+                </thead>
+                <tbody id="longitudinal-table-body">
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- TAB 3: LSVT LOUD Voice Therapy Companion -->
+      <section id="tab-lsvt-loud" class="tab-pane">
+        <!-- 3D Vocal Anatomy Banner -->
+        <div class="anatomy-banner">
+          <div class="anatomy-image-box">
+            <img src="/static/assets/vocal_cords_3d.jpg" alt="3D Vocal Cord Anatomy" class="anatomy-image">
+            <div class="anatomy-overlay"></div>
+          </div>
+          <div class="anatomy-info">
+            <div class="hero-label">
+              <span class="hero-dot"></span>
+              LSVT LOUD® Clinically Validated Protocol
+            </div>
+            <h3>Vocal Cord Rehabilitation Engine</h3>
+            <p>Real-time Sound Pressure Level tracking against the 75 dB SPL clinical threshold established by Ramig et al. (2001) and the PD COMM RCT (2024).</p>
+          </div>
+        </div>
+
+        <div class="grid-2-col">
+          <!-- Therapy Instruction & Meter Card -->
+          <div class="glass-card">
+            <div class="card-header">
+              <div class="header-icon animate-glow">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><path d="M15.54 8.46a5 5 0 0 1 0 7.07"/></svg>
+              </div>
+              <div>
+                <h3>LSVT LOUD® Phonation Coach</h3>
+                <p class="card-subtitle">Clinically validated intensive vocal loudness therapy (Ramig et al. 2001; PD COMM 2024)</p>
+              </div>
+            </div>
+
+            <div class="therapy-instructions">
+              <div class="instruction-step">
+                <span class="step-num">1</span>
+                <span>Sit up straight, take a deep diaphragmatic breath.</span>
+              </div>
+              <div class="instruction-step">
+                <span class="step-num">2</span>
+                <span>Click <strong>"Start Vocal Exercise"</strong> and hold a sustained <strong>"AHHH"</strong> as <em>loud and long</em> as possible.</span>
+              </div>
+              <div class="instruction-step">
+                <span class="step-num">3</span>
+                <span>Keep your voice above the glowing <strong>Target Loudness Bar (&ge; 75 dB SPL)</strong>.</span>
+              </div>
+            </div>
+
+            <!-- Live Decibel Visualizer -->
+            <div class="lsvt-meter-box">
+              <div class="meter-labels">
+                <span>50 dB (Quiet)</span>
+                <span class="target-marker">🎯 Target Goal: 75 dB SPL</span>
+                <span>90 dB (Loud)</span>
+              </div>
+              <div class="meter-bar-track">
+                <div id="lsvt-live-meter" class="meter-bar-fill" style="width: 20%;"></div>
+                <div class="meter-target-line" style="left: 65%;"></div>
+              </div>
+              <div class="meter-current-val">
+                <span id="lsvt-live-db">55.0</span> <span class="unit">dB SPL</span>
+              </div>
+            </div>
+
+            <!-- Controls -->
+            <div class="recorder-controls" style="margin-top: 1.5rem;">
+              <button id="btn-lsvt-start" class="btn btn-primary btn-record">
+                <span class="rec-icon"></span>
+                <span id="btn-lsvt-text">Start Vocal Exercise</span>
+              </button>
+              <button id="btn-lsvt-stop" class="btn btn-secondary" disabled>Stop & Evaluate</button>
+            </div>
+          </div>
+
+          <!-- Therapy Performance Card -->
+          <div class="glass-card">
+            <div class="card-header">
+              <div class="header-icon">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9H4.5a2.5 2.5 0 0 1 0-5H6"/><path d="M18 9h1.5a2.5 2.5 0 0 0 0-5H18"/><path d="M4 22h16"/><path d="M10 14.66V17c0 .55-.47.98-.97 1.21C7.85 18.75 7 20.24 7 22"/><path d="M14 14.66V17c0 .55.47.98.97 1.21C16.15 18.75 17 20.24 17 22"/><path d="M18 2H6v7a6 6 0 0 0 12 0V2Z"/></svg>
+              </div>
+              <div>
+                <h3>Session Performance & Feedback</h3>
+                <p class="card-subtitle">Quantitative assessment of Maximum Phonation Time & Sound Pressure Level</p>
+              </div>
+            </div>
+
+            <div id="lsvt-results-box" class="lsvt-results-box">
+              <div class="lsvt-score-circle">
+                <span id="lsvt-overall-score" class="score-val">--</span>
+                <span class="score-label">LSVT Score / 100</span>
+              </div>
+
+              <div class="lsvt-metrics-grid">
+                <div class="lsvt-metric-item">
+                  <span class="lm-label">Maximum Phonation Time</span>
+                  <span class="lm-val" id="lsvt-mpt">-- s</span>
+                  <span class="lm-sub">Target: &ge; 8.0 s</span>
+                </div>
+                <div class="lsvt-metric-item">
+                  <span class="lm-label">Mean Vocal Intensity</span>
+                  <span class="lm-val" id="lsvt-mean-db">-- dB</span>
+                  <span class="lm-sub">Target: &ge; 72 dB SPL</span>
+                </div>
+                <div class="lsvt-metric-item">
+                  <span class="lm-label">Target Compliance</span>
+                  <span class="lm-val" id="lsvt-compliance">--%</span>
+                  <span class="lm-sub">Time above threshold</span>
+                </div>
+                <div class="lsvt-metric-item">
+                  <span class="lm-label">Pitch Stability</span>
+                  <span class="lm-val" id="lsvt-pitch-stab">--</span>
+                  <span class="lm-sub">F0 Tremor Index</span>
+                </div>
+              </div>
+
+              <div class="lsvt-coach-feedback" id="lsvt-feedback-text">
+                Complete a sustained phonation exercise to receive clinical coaching feedback.
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- TAB 4: Multimodal Motor Fluctuation Module -->
+      <section id="tab-motor-tap" class="tab-pane">
+        <div class="grid-2-col">
+          <!-- Tapping Test Interactive Pad -->
+          <div class="glass-card">
+            <div class="card-header">
+              <div class="header-icon">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 11V6a2 2 0 0 0-2-2v0a2 2 0 0 0-2 2v0"/><path d="M14 10V4a2 2 0 0 0-2-2v0a2 2 0 0 0-2 2v2"/><path d="M10 10.5V6a2 2 0 0 0-2-2v0a2 2 0 0 0-2 2v8"/><path d="M18 8a2 2 0 1 1 4 0v6a8 8 0 0 1-8 8h-2c-2.8 0-4.5-.86-5.99-2.34l-3.6-3.6a2 2 0 0 1 2.83-2.82L7 15"/></svg>
+              </div>
+              <div>
+                <h3>MDS-UPDRS Finger-Tapping Test</h3>
+                <p class="card-subtitle">Alternate rapid tapping between keys/buttons to quantify arrhythmokinesis & fatigue (Zhang et al. 2025)</p>
+              </div>
+            </div>
+
+            <div class="tapping-pad-container">
+              <div class="tapping-timer-box">
+                <span>Time Remaining: <strong id="tap-timer-text">10.0s</strong></span>
+                <span>Taps Recorded: <strong id="tap-counter-text">0</strong></span>
+              </div>
+
+              <div class="tap-buttons-row">
+                <button id="btn-tap-left" class="tap-pad-btn" disabled>
+                  <span>BUTTON A</span>
+                  <kbd>Key: A / &larr;</kbd>
+                </button>
+                <button id="btn-tap-right" class="tap-pad-btn" disabled>
+                  <span>BUTTON B</span>
+                  <kbd>Key: L / &rarr;</kbd>
+                </button>
+              </div>
+
+              <div class="tap-action-row">
+                <button id="btn-start-tap-test" class="btn btn-primary">Start 10s Tapping Test</button>
+                <button id="btn-reset-tap-test" class="btn btn-secondary">Reset</button>
+              </div>
+            </div>
+          </div>
+
+          <!-- Motor Analysis & Multimodal Fusion Card -->
+          <div class="glass-card">
+            <div class="card-header">
+              <div class="header-icon">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="m4.93 4.93 4.24 4.24"/><path d="m14.83 9.17 4.24-4.24"/><path d="m14.83 14.83 4.24 4.24"/><path d="m9.17 14.83-4.24 4.24"/></svg>
+              </div>
+              <div>
+                <h3>Multimodal Fusion Telemetry</h3>
+                <p class="card-subtitle">Combines voice dysphonia index with motor tapping speed & rhythmicity</p>
+              </div>
+            </div>
+
+            <div class="motor-metrics-grid">
+              <div class="mm-item">
+                <span class="label">Tapping Frequency</span>
+                <span class="value" id="motor-tap-freq">-- Hz</span>
+                <span class="sub">Norm: 4.0 - 6.0 Hz</span>
+              </div>
+              <div class="mm-item">
+                <span class="label">ITI Variability (CV_ITI)</span>
+                <span class="value" id="motor-cv-iti">--%</span>
+                <span class="sub">Healthy: &lt; 15%</span>
+              </div>
+              <div class="mm-item">
+                <span class="label">Rhythmicity Score</span>
+                <span class="value" id="motor-rhythm-score">-- / 100</span>
+                <span class="sub">Arrhythmokinesis Index</span>
+              </div>
+              <div class="mm-item">
+                <span class="label">Motor Fatigue Slope</span>
+                <span class="value" id="motor-fatigue-slope">-- ms/tap</span>
+                <span class="sub">Speed decay over trial</span>
+              </div>
+            </div>
+
+            <!-- Multimodal Composite Box -->
+            <div class="multimodal-composite-box">
+              <div class="mc-header">
+                <span class="mc-title">Multimodal Composite Risk (Voice 60% + Motor 40%)</span>
+                <span class="mc-tag" id="mc-confidence-tag">Multimodal Active</span>
+              </div>
+              <div class="mc-body">
+                <div class="mc-score-row">
+                  <span>Fused Parkinson's Risk:</span>
+                  <strong id="mc-fused-risk" class="mc-risk-val">--%</strong>
+                </div>
+                <div class="mc-score-row">
+                  <span>Fused Severity Score:</span>
+                  <strong id="mc-fused-severity">-- UPDRS Points</strong>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- TAB 5: Research Base & Model Provenance -->
+      <section id="tab-research" class="tab-pane">
+        <!-- Brain 3D Visual Banner -->
+        <div class="research-hero-banner">
+          <img src="/static/assets/hero_brain.jpg" alt="Neural Network Visualization" class="research-hero-image">
+          <div class="research-hero-overlay"></div>
+          <div class="research-hero-text">
+            <h3>Scientific Foundation & Zero-Black-Box Provenance</h3>
+            <p>Every decision boundary, weight, and metric is learned strictly from published datasets. Full mathematical transparency below.</p>
+          </div>
+        </div>
+
+        <div class="glass-card" style="margin-top: 1.5rem;">
+          <div class="card-header">
+            <div class="header-icon">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 19.5v-15A2.5 2.5 0 0 1 6.5 2H20v20H6.5a2.5 2.5 0 0 1-0-5H20"/></svg>
+            </div>
+            <div>
+              <h3>Dataset Provenance & Model Training Transparency</h3>
+              <p class="card-subtitle">Every model is validated with stratified 5-fold cross-validation on published data</p>
+            </div>
+          </div>
+
+          <!-- Dataset Provenance Cards -->
+          <div class="datasets-grid">
+            <div class="dataset-card">
+              <div class="ds-badge">Primary Detection Dataset</div>
+              <h4>UCI Oxford Parkinson's Dataset</h4>
+              <p class="ds-author">Little MA, McSharry PE, Roberts SJ, et al. (2008 / 2009)</p>
+              <div class="ds-stats">
+                <span>195 Voice Recordings</span>
+                <span>31 Subjects (23 PD, 8 Control)</span>
+                <span>22 Acoustic Features</span>
+              </div>
+              <div class="ds-results">
+                <strong>Trained Models:</strong> SVM (91.8% CV Acc, 95.7% ROC-AUC), Random Forest (89.7% CV Acc), CNN-LSTM (94.4% Acc).
+              </div>
+            </div>
+
+            <div class="dataset-card">
+              <div class="ds-badge">Telemonitoring UPDRS Dataset</div>
+              <h4>UCI Parkinson's Telemonitoring Dataset</h4>
+              <p class="ds-author">Tsanas A, Little MA, McSharry PE, Ramig LO (2010 / 2012)</p>
+              <div class="ds-stats">
+                <span>5,875 Voice Recordings</span>
+                <span>42 PD Patients</span>
+                <span>Continuous UPDRS Scores</span>
+              </div>
+              <div class="ds-results">
+                <strong>Trained Models:</strong> Motor UPDRS Regressor (MAE = 1.59 pts, R² = 0.921), Total UPDRS Regressor (MAE = 1.66 pts, R² = 0.957).
+              </div>
+            </div>
+
+            <div class="dataset-card">
+              <div class="ds-badge">High-Dimensional Speech Dataset</div>
+              <h4>UCI PD Speech Features Dataset</h4>
+              <p class="ds-author">Sakar CO, Serbes G, Gunduz A, et al. (2019)</p>
+              <div class="ds-stats">
+                <span>756 Recordings</span>
+                <span>252 Subjects (188 PD, 64 Control)</span>
+                <span>753 Acoustic/Wavelet Features</span>
+              </div>
+              <div class="ds-results">
+                <strong>Trained Models:</strong> High-dimensional Random Forest & Feature Selection.
+              </div>
+            </div>
+          </div>
+
+          <!-- Holographic Dashboard Image -->
+          <div class="holographic-image-container">
+            <img src="/static/assets/holographic_dashboard.jpg" alt="Holographic Medical Dashboard" class="holographic-image">
+            <div class="holographic-overlay"></div>
+            <div class="holographic-caption">
+              <span>Real-time multi-model telemetry dashboard — fusing SVM, Random Forest, CNN-LSTM, and Autoencoder inference across all 22 biomarkers simultaneously</span>
+            </div>
+          </div>
+
+          <!-- Mathematical Glossary -->
+          <div class="glossary-section">
+            <h4>Acoustic Biomarker Mathematical Formulas & Clinical Meanings</h4>
+            <div class="glossary-grid">
+              <div class="glossary-item">
+                <h5>1. Pitch Period Entropy (PPE) (Little et al. 2009)</h5>
+                <p>Measures impaired pitch control and micro-tremor on logarithmic semitone transformations: $r_i = 12 \log_2(f_{0,i} / f_{\text{median}})$. Shannon entropy of $r_i$ reveals involuntary vocal drift.</p>
+              </div>
+              <div class="glossary-item">
+                <h5>2. Jitter & Shimmer Perturbations</h5>
+                <p><strong>Jitter</strong> quantifies cycle-to-cycle frequency variations: $\frac{1}{N-1}\sum |T_i - T_{i+1}| / \bar{T}$. <strong>Shimmer</strong> quantifies cycle-to-cycle amplitude perturbations: $\frac{1}{N-1}\sum |A_i - A_{i+1}| / \bar{A}$.</p>
+              </div>
+              <div class="glossary-item">
+                <h5>3. Harmonics-to-Noise Ratio (HNR)</h5>
+                <p>Measures the ratio of harmonic vocal energy to turbulent aspiration noise: $10 \log_{10}(R_{xx}(\tau) / (R_{xx}(0) - R_{xx}(\tau)))$. Normal voices show HNR &gt; 20 dB; breathy dysphonia shows low HNR.</p>
+              </div>
+              <div class="glossary-item">
+                <h5>4. Recurrence Period Density Entropy (RPDE)</h5>
+                <p>Nonlinear dynamical feature that embeds speech into $m$-dimensional phase space and calculates entropy of recurrence return times $T$, quantifying vocal tract turbulence.</p>
+              </div>
+              <div class="glossary-item">
+                <h5>5. Detrended Fluctuation Analysis (DFA)</h5>
+                <p>Computes the fractal scaling exponent $\alpha$ via log-log regression of root-mean-square fluctuations $F(n)$ across box sizes $n$, sensitive to long-range self-similarity loss.</p>
+              </div>
+              <div class="glossary-item">
+                <h5>6. Bayesian Online Changepoint Detection (BOCPD)</h5>
+                <p>Calculates the recursive posterior distribution of run-length $r_t$ under a Student-t conjugate prior, enabling instant detection of medication wear-off without fixed thresholds.</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <script src="/static/app.js"></script>
+</body>
+</html>

@@ -1,0 +1,27 @@
+{
+  "dataset": "UCI Parkinson's Telemonitoring Dataset (Tsanas et al. 2010)",
+  "citation": "Tsanas A, Little MA, McSharry PE, Ramig LO. 'Accurate telemonitoring of Parkinson's disease progression by non-invasive speech tests.' IEEE Trans Biomed Eng 2010; 57(4): 884-893.",
+  "n_samples": 5875,
+  "feature_names": [
+    "age",
+    "sex",
+    "Jitter(%)",
+    "Jitter(Abs)",
+    "Jitter:RAP",
+    "Jitter:PPQ5",
+    "Jitter:DDP",
+    "Shimmer",
+    "Shimmer(dB)",
+    "Shimmer:APQ3",
+    "Shimmer:APQ5",
+    "Shimmer:APQ11",
+    "Shimmer:DDA",
+    "NHR",
+    "HNR",
+    "RPDE",
+    "DFA",
+    "PPE"
+  ],
+  "motor_updrs_mae": 1.5905490266674045,
+  "total_updrs_mae": 1.6553190056197038
+}
