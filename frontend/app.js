@@ -192,43 +192,508 @@ document.addEventListener('DOMContentLoaded', () => {
   initThreeBackground();
 
   // =========================================================================
-  // 0b. Hero Section Floating Particles
+  // 0b. Interactive 3D Anatomical Brain Viewer (WebGL / Three.js)
   // =========================================================================
-  function initHeroParticles() {
-    const container = document.getElementById('hero-particles');
-    if (!container) return;
+  function init3DBrainViewer() {
+    const canvas = document.getElementById('three-brain-canvas');
+    if (!canvas || typeof THREE === 'undefined') return;
 
-    for (let i = 0; i < 20; i++) {
-      const particle = document.createElement('div');
-      particle.style.cssText = `
-        position: absolute;
-        width: ${Math.random() * 4 + 2}px;
-        height: ${Math.random() * 4 + 2}px;
-        background: rgba(79, 154, 139, ${Math.random() * 0.5 + 0.15});
-        border-radius: 50%;
-        top: ${Math.random() * 100}%;
-        left: ${Math.random() * 100}%;
-        animation: heroFloat ${Math.random() * 4 + 3}s ease-in-out infinite;
-        animation-delay: ${Math.random() * 3}s;
-        box-shadow: 0 0 4px rgba(79, 154, 139, 0.25);
-      `;
-      container.appendChild(particle);
+    const container = canvas.parentElement;
+    const width = container.clientWidth || 480;
+    const height = container.clientHeight || 340;
+
+    const scene = new THREE.Scene();
+    const camera = new THREE.PerspectiveCamera(45, width / height, 0.1, 100);
+    camera.position.set(0, 1.2, 18);
+
+    const renderer = new THREE.WebGLRenderer({
+      canvas: canvas,
+      alpha: true,
+      antialias: true,
+      powerPreference: 'high-performance'
+    });
+    renderer.setSize(width, height);
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+
+    // Master Brain Group for smooth rotation
+    const brainGroup = new THREE.Group();
+    scene.add(brainGroup);
+
+    // Anatomical Brain Particle Generation
+    const totalCortical = 3200;
+    const totalDopamine = 350;
+    const totalMotor = 300;
+    const totalPoints = totalCortical + totalDopamine + totalMotor;
+
+    const positions = new Float32Array(totalPoints * 3);
+    const baseColors = new Float32Array(totalPoints * 3);
+    const currentColors = new Float32Array(totalPoints * 3);
+    const sizes = new Float32Array(totalPoints);
+    const particleTypes = new Uint8Array(totalPoints); // 0 = cortex, 1 = dopamine (substantia nigra), 2 = motor cortex
+
+    let ptr = 0;
+
+    // 1. Smooth Anatomical Cortical Hemispheres (Left & Right)
+    for (let i = 0; i < totalCortical; i++) {
+      const hemi = Math.random() < 0.5 ? -1 : 1;
+      
+      // Parametric hemisphere coordinates
+      const theta = (Math.random() - 0.5) * Math.PI; // -pi/2 to pi/2
+      const phi = 0.08 + Math.random() * (Math.PI - 0.16); // 0 to pi (poles)
+
+      // Multi-scale harmonic gyri and sulci wrinkles
+      const gyrus1 = 0.32 * Math.sin(7 * theta) * Math.cos(5 * phi);
+      const gyrus2 = 0.16 * Math.sin(13 * theta + phi) * Math.cos(8 * phi);
+      const gyrus3 = 0.08 * Math.sin(18 * phi);
+      const fold = 1.0 + gyrus1 + gyrus2 + gyrus3;
+
+      // Radial shell with mantle depth
+      const rDepth = 0.75 + 0.25 * Math.sqrt(Math.random());
+      
+      // Anatomical shape dimensions
+      const Ax = 2.4 * rDepth * fold;
+      const By = 2.6 * rDepth * fold;
+      const Cz = 3.6 * rDepth * fold;
+
+      let x = hemi * (0.28 + Math.abs(Math.cos(theta) * Math.sin(phi)) * Ax);
+      let y = Math.cos(phi) * By;
+      let z = Math.sin(theta) * Math.sin(phi) * Cz;
+
+      // Frontal lobe anterior rounding
+      if (z > 0.5) {
+        y *= 0.95;
+        x *= 0.92;
+      }
+      // Temporal lobe lateral expansion
+      if (y < -0.4 && z > -1.2 && z < 1.4) {
+        x *= 1.18;
+        y -= 0.25;
+      }
+      // Occipital lobe posterior curvature
+      if (z < -1.5) {
+        x *= 0.88;
+        y *= 0.92;
+      }
+      // Cerebellar postero-inferior cluster
+      if (Math.random() < 0.15) {
+        const cTheta = Math.random() * Math.PI * 2;
+        const cRad = 0.4 + Math.random() * 1.3;
+        x = hemi * (0.35 + Math.abs(Math.cos(cTheta)) * cRad * 1.1);
+        y = -2.1 - Math.random() * 1.1;
+        z = -2.0 - Math.abs(Math.sin(cTheta)) * cRad * 1.2;
+      }
+      // Brainstem descending column
+      if (Math.random() < 0.04) {
+        const bRad = Math.random() * 0.45;
+        const bAng = Math.random() * Math.PI * 2;
+        x = Math.cos(bAng) * bRad;
+        y = -2.4 - Math.random() * 1.8;
+        z = -0.5 + Math.sin(bAng) * bRad * 0.8;
+      }
+
+      positions[ptr * 3] = x;
+      positions[ptr * 3 + 1] = y;
+      positions[ptr * 3 + 2] = z;
+
+      // Bioluminescent palette: glowing electric cyan to lavender
+      const t = (y + 3) / 6;
+      const rCol = THREE.MathUtils.lerp(0.05, 0.45, t);
+      const gCol = THREE.MathUtils.lerp(0.85, 0.40, t);
+      const bCol = THREE.MathUtils.lerp(1.0, 0.92, t);
+
+      baseColors[ptr * 3] = rCol;
+      baseColors[ptr * 3 + 1] = gCol;
+      baseColors[ptr * 3 + 2] = bCol;
+
+      currentColors[ptr * 3] = rCol;
+      currentColors[ptr * 3 + 1] = gCol;
+      currentColors[ptr * 3 + 2] = bCol;
+
+      sizes[ptr] = Math.random() * 1.6 + 1.2;
+      particleTypes[ptr] = 0;
+      ptr++;
     }
 
-    // Add keyframe for hero float
-    if (!document.getElementById('hero-float-style')) {
-      const style = document.createElement('style');
-      style.id = 'hero-float-style';
-      style.textContent = `
-        @keyframes heroFloat {
-          0%, 100% { transform: translate(0, 0) scale(1); opacity: 0.4; }
-          50% { transform: translate(${Math.random() * 20 - 10}px, ${Math.random() * 20 - 10}px) scale(1.3); opacity: 1; }
+    // 2. Basal Ganglia & Substantia Nigra (Dopamine Circuit - Key to Parkinson's)
+    for (let i = 0; i < totalDopamine; i++) {
+      const hemi = Math.random() < 0.5 ? -1 : 1;
+      const isSN = Math.random() < 0.45; // Substantia Nigra vs Striatum
+      
+      let x, y, z;
+      if (isSN) {
+        // Substantia Nigra: crescent located at ventral midbrain
+        const tArc = (Math.random() - 0.5) * 1.2;
+        x = hemi * (0.65 + Math.cos(tArc) * 0.4 + (Math.random() - 0.5) * 0.25);
+        y = -0.9 + Math.sin(tArc) * 0.3 + (Math.random() - 0.5) * 0.2;
+        z = -0.15 + (Math.random() - 0.5) * 0.35;
+      } else {
+        // Striatum / Putamen: C-shaped structure curving superiorly & anteriorly
+        const tArc = Math.random() * Math.PI * 0.8;
+        x = hemi * (1.1 + Math.sin(tArc) * 0.45 + (Math.random() - 0.5) * 0.3);
+        y = -0.3 + Math.cos(tArc) * 0.7 + (Math.random() - 0.5) * 0.3;
+        z = 0.2 + Math.sin(tArc) * 0.6 + (Math.random() - 0.5) * 0.35;
+      }
+
+      positions[ptr * 3] = x;
+      positions[ptr * 3 + 1] = y;
+      positions[ptr * 3 + 2] = z;
+
+      // Radiant Warm Gold/Amber for Dopamine
+      const rCol = 0.98;
+      const gCol = 0.74 + Math.random() * 0.16;
+      const bCol = 0.12;
+
+      baseColors[ptr * 3] = rCol;
+      baseColors[ptr * 3 + 1] = gCol;
+      baseColors[ptr * 3 + 2] = bCol;
+
+      currentColors[ptr * 3] = rCol;
+      currentColors[ptr * 3 + 1] = gCol;
+      currentColors[ptr * 3 + 2] = bCol;
+
+      sizes[ptr] = Math.random() * 2.2 + 1.4;
+      particleTypes[ptr] = 1;
+      ptr++;
+    }
+
+    // 3. Laryngeal & Vocal Motor Area (Speech Cortex)
+    for (let i = 0; i < totalMotor; i++) {
+      const hemi = Math.random() < 0.5 ? -1 : 1;
+      const tMotor = Math.random();
+      // Precentral gyrus lateral coronal band
+      const x = hemi * (1.8 + tMotor * 1.3 + (Math.random() - 0.5) * 0.3);
+      const y = 0.6 + (1.0 - tMotor) * 1.6 + (Math.random() - 0.5) * 0.3;
+      const z = 0.4 + (Math.random() - 0.5) * 0.6;
+
+      positions[ptr * 3] = x;
+      positions[ptr * 3 + 1] = y;
+      positions[ptr * 3 + 2] = z;
+
+      // Electric Sky Cyan / Turquoise
+      const rCol = 0.0;
+      const gCol = 0.92;
+      const bCol = 1.0;
+
+      baseColors[ptr * 3] = rCol;
+      baseColors[ptr * 3 + 1] = gCol;
+      baseColors[ptr * 3 + 2] = bCol;
+
+      currentColors[ptr * 3] = rCol;
+      currentColors[ptr * 3 + 1] = gCol;
+      currentColors[ptr * 3 + 2] = bCol;
+
+      sizes[ptr] = Math.random() * 2.0 + 1.3;
+      particleTypes[ptr] = 2;
+      ptr++;
+    }
+
+    const brainGeo = new THREE.BufferGeometry();
+    brainGeo.setAttribute('position', new THREE.BufferAttribute(positions, 3));
+    brainGeo.setAttribute('color', new THREE.BufferAttribute(currentColors, 3));
+
+    // Procedural Circular Glow Texture (100% cross-platform, zero square edge artifacts)
+    function createGlowDotTexture() {
+      const pCanvas = document.createElement('canvas');
+      pCanvas.width = 64;
+      pCanvas.height = 64;
+      const pCtx = pCanvas.getContext('2d');
+      const grad = pCtx.createRadialGradient(32, 32, 0, 32, 32, 32);
+      grad.addColorStop(0.0, 'rgba(255, 255, 255, 1.0)');
+      grad.addColorStop(0.25, 'rgba(255, 255, 255, 0.7)');
+      grad.addColorStop(0.55, 'rgba(255, 255, 255, 0.25)');
+      grad.addColorStop(1.0, 'rgba(255, 255, 255, 0.0)');
+      pCtx.fillStyle = grad;
+      pCtx.fillRect(0, 0, 64, 64);
+      const texture = new THREE.CanvasTexture(pCanvas);
+      return texture;
+    }
+
+    const glowTexture = createGlowDotTexture();
+
+    const brainMaterial = new THREE.PointsMaterial({
+      size: 0.28,
+      vertexColors: true,
+      map: glowTexture,
+      transparent: true,
+      opacity: 0.88,
+      blending: THREE.AdditiveBlending,
+      depthWrite: false,
+    });
+
+    const brainPoints = new THREE.Points(brainGeo, brainMaterial);
+    brainGroup.add(brainPoints);
+
+    // 4. Cortical Synaptic Connection Lines
+    const lineIndices = [];
+    const lineColors = [];
+    const maxLineDist = 1.05;
+
+    for (let i = 0; i < 800; i++) {
+      const idxA = Math.floor(Math.random() * totalCortical);
+      const ax = positions[idxA * 3];
+      const ay = positions[idxA * 3 + 1];
+      const az = positions[idxA * 3 + 2];
+
+      for (let j = 0; j < 5; j++) {
+        const idxB = Math.floor(Math.random() * totalCortical);
+        if (idxA === idxB) continue;
+        const bx = positions[idxB * 3];
+        const by = positions[idxB * 3 + 1];
+        const bz = positions[idxB * 3 + 2];
+
+        const dx = ax - bx;
+        const dy = ay - by;
+        const dz = az - bz;
+        const d = Math.sqrt(dx * dx + dy * dy + dz * dz);
+
+        if (d < maxLineDist && lineIndices.length < 2800) {
+          lineIndices.push(ax, ay, az, bx, by, bz);
+          const alpha = 1.0 - (d / maxLineDist);
+          lineColors.push(0.0, 0.6 * alpha, 0.75 * alpha);
+          lineColors.push(0.35 * alpha, 0.25 * alpha, 0.65 * alpha);
         }
-      `;
-      document.head.appendChild(style);
+      }
     }
+
+    // Nigrostriatal Dopamine Pathway Lines (Substantia Nigra to Motor Area)
+    for (let k = 0; k < 35; k++) {
+      const dopIdx = totalCortical + Math.floor(Math.random() * totalDopamine);
+      const motIdx = totalCortical + totalDopamine + Math.floor(Math.random() * totalMotor);
+
+      lineIndices.push(
+        positions[dopIdx * 3], positions[dopIdx * 3 + 1], positions[dopIdx * 3 + 2],
+        positions[motIdx * 3], positions[motIdx * 3 + 1], positions[motIdx * 3 + 2]
+      );
+      lineColors.push(0.95, 0.68, 0.1);
+      lineColors.push(0.05, 0.8, 0.95);
+    }
+
+    const lineGeo = new THREE.BufferGeometry();
+    lineGeo.setAttribute('position', new THREE.Float32BufferAttribute(lineIndices, 3));
+    lineGeo.setAttribute('color', new THREE.Float32BufferAttribute(lineColors, 3));
+
+    const lineMat = new THREE.LineBasicMaterial({
+      vertexColors: true,
+      transparent: true,
+      opacity: 0.22,
+      blending: THREE.AdditiveBlending,
+    });
+
+    const brainLines = new THREE.LineSegments(lineGeo, lineMat);
+    brainGroup.add(brainLines);
+
+    // 5. Action Potential Synaptic Pulse Sparks
+    const sparkCount = 35;
+    const sparkPositions = new Float32Array(sparkCount * 3);
+    const sparkSpeeds = [];
+    const sparkTracts = [];
+
+    for (let i = 0; i < sparkCount; i++) {
+      const startIdx = totalCortical + Math.floor(Math.random() * totalDopamine);
+      const endIdx = totalCortical + totalDopamine + Math.floor(Math.random() * totalMotor);
+      sparkTracts.push({
+        start: new THREE.Vector3(positions[startIdx * 3], positions[startIdx * 3 + 1], positions[startIdx * 3 + 2]),
+        end: new THREE.Vector3(positions[endIdx * 3], positions[endIdx * 3 + 1], positions[endIdx * 3 + 2]),
+        progress: Math.random()
+      });
+      sparkSpeeds.push(0.008 + Math.random() * 0.014);
+    }
+
+    const sparkGeo = new THREE.BufferGeometry();
+    sparkGeo.setAttribute('position', new THREE.BufferAttribute(sparkPositions, 3));
+
+    const sparkMat = new THREE.PointsMaterial({
+      color: 0xffe680,
+      size: 0.32,
+      map: glowTexture,
+      transparent: true,
+      opacity: 0.95,
+      blending: THREE.AdditiveBlending,
+      depthWrite: false,
+    });
+
+    const sparkPoints = new THREE.Points(sparkGeo, sparkMat);
+    brainGroup.add(sparkPoints);
+
+    // Initial slight tilt for optimal anatomical view
+    brainGroup.rotation.x = 0.15;
+    brainGroup.rotation.y = -0.35;
+
+    // Interactive Mode State: 'all', 'dopamine', 'motor'
+    let currentMode = 'all';
+
+    function updateBrainMode(mode) {
+      currentMode = mode;
+      const tag = document.getElementById('brain-region-tag');
+
+      if (mode === 'all') {
+        if (tag) tag.textContent = 'REGIONS: ALL HEMISPHERES';
+        lineMat.opacity = 0.28;
+      } else if (mode === 'dopamine') {
+        if (tag) tag.textContent = 'FOCUS: SUBSTANTIA NIGRA & BASAL GANGLIA (PARKINSONS)';
+        lineMat.opacity = 0.12;
+      } else if (mode === 'motor') {
+        if (tag) tag.textContent = 'FOCUS: LARYNGEAL VOCAL MOTOR CORTEX';
+        lineMat.opacity = 0.12;
+      }
+
+      document.querySelectorAll('.brain-ctrl-btn').forEach(btn => {
+        if (btn.getAttribute('data-mode') === mode) btn.classList.add('active');
+        else btn.classList.remove('active');
+      });
+    }
+
+    document.querySelectorAll('.brain-ctrl-btn').forEach(btn => {
+      btn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        const mode = btn.getAttribute('data-mode');
+        updateBrainMode(mode);
+      });
+    });
+
+    // Mouse / Touch 3D Orbit Drag Controls
+    let isDragging = false;
+    let prevMouseX = 0;
+    let prevMouseY = 0;
+    let rotVelX = 0;
+    let rotVelY = 0.0035;
+
+    canvas.addEventListener('mousedown', (e) => {
+      isDragging = true;
+      prevMouseX = e.clientX;
+      prevMouseY = e.clientY;
+    });
+
+    window.addEventListener('mouseup', () => { isDragging = false; });
+
+    window.addEventListener('mousemove', (e) => {
+      if (!isDragging) return;
+      const deltaX = e.clientX - prevMouseX;
+      const deltaY = e.clientY - prevMouseY;
+      prevMouseX = e.clientX;
+      prevMouseY = e.clientY;
+
+      brainGroup.rotation.y += deltaX * 0.008;
+      brainGroup.rotation.x += deltaY * 0.008;
+      rotVelY = deltaX * 0.004;
+      rotVelX = deltaY * 0.004;
+    });
+
+    canvas.addEventListener('touchstart', (e) => {
+      if (e.touches.length === 1) {
+        isDragging = true;
+        prevMouseX = e.touches[0].clientX;
+        prevMouseY = e.touches[0].clientY;
+      }
+    }, { passive: true });
+
+    window.addEventListener('touchend', () => { isDragging = false; });
+
+    window.addEventListener('touchmove', (e) => {
+      if (!isDragging || e.touches.length !== 1) return;
+      const deltaX = e.touches[0].clientX - prevMouseX;
+      const deltaY = e.touches[0].clientY - prevMouseY;
+      prevMouseX = e.touches[0].clientX;
+      prevMouseY = e.touches[0].clientY;
+
+      brainGroup.rotation.y += deltaX * 0.008;
+      brainGroup.rotation.x += deltaY * 0.008;
+    }, { passive: true });
+
+    canvas.addEventListener('wheel', (e) => {
+      e.preventDefault();
+      camera.position.z += e.deltaY * 0.02;
+      camera.position.z = Math.max(12, Math.min(32, camera.position.z));
+    }, { passive: false });
+
+    // Animation Loop
+    let clock = 0;
+    function animateBrain() {
+      requestAnimationFrame(animateBrain);
+      clock += 0.02;
+
+      // Inertia & Auto-rotation
+      if (!isDragging) {
+        rotVelY = THREE.MathUtils.lerp(rotVelY, 0.0032, 0.04);
+        rotVelX = THREE.MathUtils.lerp(rotVelX, 0.0, 0.04);
+        brainGroup.rotation.y += rotVelY;
+        brainGroup.rotation.x += rotVelX;
+      }
+
+      // Breathing / Synaptic Pulse Oscillation
+      const pulse = 1.0 + Math.sin(clock * 2) * 0.015;
+      brainGroup.scale.set(pulse, pulse, pulse);
+
+      // Animate Dopamine Action Potential Sparks
+      const sparkPosArray = sparkGeo.attributes.position.array;
+      for (let i = 0; i < sparkCount; i++) {
+        const tract = sparkTracts[i];
+        tract.progress += sparkSpeeds[i];
+        if (tract.progress > 1.0) tract.progress = 0;
+
+        const currentPos = new THREE.Vector3().lerpVectors(tract.start, tract.end, tract.progress);
+        sparkPosArray[i * 3] = currentPos.x;
+        sparkPosArray[i * 3 + 1] = currentPos.y;
+        sparkPosArray[i * 3 + 2] = currentPos.z;
+      }
+      sparkGeo.attributes.position.needsUpdate = true;
+
+      // Dynamic Color / Focus Shading based on currentMode
+      const colArray = brainGeo.attributes.color.array;
+      for (let i = 0; i < totalPoints; i++) {
+        const pType = particleTypes[i];
+        const baseR = baseColors[i * 3];
+        const baseG = baseColors[i * 3 + 1];
+        const baseB = baseColors[i * 3 + 2];
+
+        let targetDim = 1.0;
+
+        if (currentMode === 'dopamine') {
+          if (pType === 1) {
+            const dopPulse = 1.0 + Math.sin(clock * 5 + i * 0.1) * 0.4;
+            colArray[i * 3] = Math.min(1.0, baseR * dopPulse);
+            colArray[i * 3 + 1] = Math.min(1.0, baseG * dopPulse);
+            colArray[i * 3 + 2] = Math.min(1.0, baseB * dopPulse);
+            continue;
+          } else {
+            targetDim = 0.12;
+          }
+        } else if (currentMode === 'motor') {
+          if (pType === 2) {
+            const motPulse = 1.0 + Math.sin(clock * 5 + i * 0.1) * 0.35;
+            colArray[i * 3] = Math.min(1.0, baseR * motPulse);
+            colArray[i * 3 + 1] = Math.min(1.0, baseG * motPulse);
+            colArray[i * 3 + 2] = Math.min(1.0, baseB * motPulse);
+            continue;
+          } else {
+            targetDim = 0.14;
+          }
+        }
+
+        colArray[i * 3] = baseR * targetDim;
+        colArray[i * 3 + 1] = baseG * targetDim;
+        colArray[i * 3 + 2] = baseB * targetDim;
+      }
+      brainGeo.attributes.color.needsUpdate = true;
+
+      renderer.render(scene, camera);
+    }
+
+    animateBrain();
+
+    function onResize() {
+      if (!container) return;
+      const newW = container.clientWidth || 480;
+      const newH = container.clientHeight || 340;
+      camera.aspect = newW / newH;
+      camera.updateProjectionMatrix();
+      renderer.setSize(newW, newH);
+    }
+
+    window.addEventListener('resize', onResize);
   }
-  initHeroParticles();
+
+  init3DBrainViewer();
 
   // =========================================================================
   // 1. Navigation & Tabs
@@ -305,13 +770,13 @@ document.addEventListener('DOMContentLoaded', () => {
 
   function drawEmptyWaveform() {
     const grad = canvasCtx.createLinearGradient(0, 0, 0, canvas.height);
-    grad.addColorStop(0, '#050810');
-    grad.addColorStop(1, '#0a0f1a');
+    grad.addColorStop(0, '#040710');
+    grad.addColorStop(1, '#080d1a');
     canvasCtx.fillStyle = grad;
     canvasCtx.fillRect(0, 0, canvas.width, canvas.height);
 
     // Grid lines
-    canvasCtx.strokeStyle = 'rgba(79, 154, 139, 0.05)';
+    canvasCtx.strokeStyle = 'rgba(0, 229, 255, 0.05)';
     canvasCtx.lineWidth = 1;
     for (let y = 0; y < canvas.height; y += 30) {
       canvasCtx.beginPath();
@@ -321,7 +786,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     // Center line
-    canvasCtx.strokeStyle = 'rgba(79, 154, 139, 0.12)';
+    canvasCtx.strokeStyle = 'rgba(0, 229, 255, 0.2)';
     canvasCtx.lineWidth = 1.5;
     canvasCtx.beginPath();
     canvasCtx.moveTo(0, canvas.height / 2);
@@ -345,13 +810,13 @@ document.addEventListener('DOMContentLoaded', () => {
       analyserNode.getByteTimeDomainData(dataArray);
 
       const grad = canvasCtx.createLinearGradient(0, 0, 0, canvas.height);
-      grad.addColorStop(0, '#050810');
-      grad.addColorStop(1, '#0a0f1a');
+      grad.addColorStop(0, '#040710');
+      grad.addColorStop(1, '#080d1a');
       canvasCtx.fillStyle = grad;
       canvasCtx.fillRect(0, 0, canvas.width, canvas.height);
 
       // Neon grid lines
-      canvasCtx.strokeStyle = 'rgba(255, 255, 255, 0.03)';
+      canvasCtx.strokeStyle = 'rgba(0, 229, 255, 0.04)';
       canvasCtx.lineWidth = 1;
       canvasCtx.beginPath();
       canvasCtx.moveTo(0, canvas.height * 0.25); canvasCtx.lineTo(canvas.width, canvas.height * 0.25);
@@ -360,14 +825,14 @@ document.addEventListener('DOMContentLoaded', () => {
 
       // Glowing Waveform with gradient
       const waveGrad = canvasCtx.createLinearGradient(0, 0, canvas.width, 0);
-      waveGrad.addColorStop(0, '#4F9A8B');
-      waveGrad.addColorStop(0.5, '#8B7EC8');
-      waveGrad.addColorStop(1, '#4F9A8B');
+      waveGrad.addColorStop(0, '#00e5ff');
+      waveGrad.addColorStop(0.5, '#a855f7');
+      waveGrad.addColorStop(1, '#00e5ff');
 
       canvasCtx.lineWidth = 2.5;
       canvasCtx.strokeStyle = waveGrad;
-      canvasCtx.shadowBlur = 8;
-      canvasCtx.shadowColor = '#4F9A8B';
+      canvasCtx.shadowBlur = 12;
+      canvasCtx.shadowColor = '#00e5ff';
 
       canvasCtx.beginPath();
       const sliceWidth = canvas.width / bufferLength;

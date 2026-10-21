@@ -96,20 +96,45 @@
 
       <!-- TAB 1: Voice Biomarker Lab -->
       <section id="tab-voice-lab" class="tab-pane active">
-        <!-- Hero 3D Visual Banner -->
+        <!-- Hero 3D Visual Banner with Interactive 3D Brain -->
         <div class="hero-banner">
-          <div class="hero-image-container">
-            <img src="/static/assets/voice_neural.jpg" alt="Neural Voice Analysis" class="hero-image" id="hero-3d-image">
-            <div class="hero-image-overlay"></div>
-            <div class="hero-particles" id="hero-particles"></div>
+          <div class="hero-3d-viewport" id="hero-3d-viewport">
+            <canvas id="three-brain-canvas"></canvas>
+            <div class="brain-hud-overlay">
+              <div class="brain-hud-top">
+                <div class="brain-hud-badge">
+                  <span class="hud-pulse"></span>
+                  <span class="hud-text">3D NEURAL BIOMARKER MAPPING</span>
+                </div>
+                <div class="brain-region-tag" id="brain-region-tag">REGIONS: ALL HEMISPHERES</div>
+              </div>
+              <div class="brain-hud-controls">
+                <button class="brain-ctrl-btn active" data-mode="all" id="btn-brain-all" title="View complete cortical neural network">
+                  <span class="btn-dot teal"></span>
+                  <span>Full Cortex</span>
+                </button>
+                <button class="brain-ctrl-btn" data-mode="dopamine" id="btn-brain-dopamine" title="Highlight Substantia Nigra dopamine circuit affected by Parkinson's">
+                  <span class="btn-dot amber"></span>
+                  <span>Substantia Nigra (Dopamine)</span>
+                </button>
+                <button class="brain-ctrl-btn" data-mode="motor" id="btn-brain-motor" title="Highlight laryngeal and vocal speech motor cortex">
+                  <span class="btn-dot cyan"></span>
+                  <span>Vocal Motor Area</span>
+                </button>
+              </div>
+              <div class="brain-hud-hint">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21.5 2v6h-6M21.34 15.57a10 10 0 1 1-.57-8.38l5.67-5.67"/></svg>
+                <span>Drag to rotate in 3D • Scroll to zoom • Toggle regions</span>
+              </div>
+            </div>
           </div>
           <div class="hero-text">
             <div class="hero-label">
               <span class="hero-dot"></span>
-              ML-Powered Acoustic Analysis
+              WebGL 3D Neural Mapping & ML Telemonitoring
             </div>
-            <h3>Voice-to-Neural Signal Extraction Engine</h3>
-            <p>Transforming raw acoustic waveforms into 22 clinically validated dysphonia biomarkers through deterministic DSP and ensemble classification.</p>
+            <h3>Parkinsonian Vocal Biomarker & Neural Engine</h3>
+            <p>Mapping acoustic phonation dynamics directly to the neurophysiological degeneration of the <strong>Substantia Nigra</strong> and <strong>laryngeal motor cortex</strong> via deterministic DSP and machine learning ensembles.</p>
             <div class="hero-stats">
               <div class="hero-stat">
                 <span class="hs-val">22</span>
@@ -125,7 +150,7 @@
               </div>
               <div class="hero-stat">
                 <span class="hs-val">5,875</span>
-                <span class="hs-label">Training Samples</span>
+                <span class="hs-label">Research Samples</span>
               </div>
             </div>
           </div>
